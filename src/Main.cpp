@@ -41,15 +41,8 @@ int main() {
     while (){
         cvsink.GrabFrameNoTimeout(input); // blocks until frame is avaliable
         pipe.Process(input);
-        cv::Mat output = pipe.GetHsvThresholdOutput();
+        std::vector<std::vector<cv::Point>> imagePoints = *pipe.GetConvexHullsOutput();
 
-        std::vector<cv::KeyPoint> points = pipe.findBlobsOutput;
-        std::vector<cv::Point2f> imagePoints;
-        for (int i = 0; i < (points.size()-1); i++){
-            cv::Point2f 2Dpoint;
-            cv::KeyPoint::convert(points[i], 2Dpoint);
-            imagePoints.push_back(2Dpoint);
-        }
         std::vector<cv::Point3f> modelPoints;
         modelPoints.push_back(cv::Point3f(/*help me*/));
         cv::Mat rotationMatrix translationMatrix;
