@@ -23,19 +23,19 @@ class GripPipeline {
 		GripPipeline() = default;
 		void Process(cv::Mat& source0);
 		cv::Mat* GetHsvThresholdOutput();
-		cv::Mat* GetPolyDPOutput();
+		std::vector<std::vector<cv::Point> >* GetPolyDPOutput();
 		std::vector<std::vector<cv::Point> >* GetFindContoursOutput();
 		std::vector<std::vector<cv::Point> >* GetFilterContoursOutput();
 		std::vector<std::vector<cv::Point> >* GetConvexHullsOutput();
 
 	private:
 		cv::Mat hsvThresholdOutput;
-		cv::Mat polyDPOutput;
+		std::vector<std::vector<cv::Point> > polyDPOutput;
 		std::vector<std::vector<cv::Point> > findContoursOutput;
 		std::vector<std::vector<cv::Point> > filterContoursOutput;
 		std::vector<std::vector<cv::Point> > convexHullsOutput;
 		void hsvThreshold(cv::Mat &, double [], double [], double [], cv::Mat &);
-		void polyDP(std::vector<std::vector<cv::Point> > &, double epsilon, bool closed, cv::Mat &out);
+		void polyDP(std::vector<std::vector<cv::Point> > &, double epsilon, bool closed, std::vector<std::vector<cv::Point> > &out);
 		void findContours(cv::Mat &, bool , std::vector<std::vector<cv::Point> > &);
 		void filterContours(std::vector<std::vector<cv::Point> > &, double , double , double , double , double , double , double [], double , double , double , double , std::vector<std::vector<cv::Point> > &);
 		void convexHulls(std::vector<std::vector<cv::Point> > &, std::vector<std::vector<cv::Point> > &);

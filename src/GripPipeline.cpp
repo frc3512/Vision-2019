@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <opencv4/opencv2/core/types_c.h>
+
 #include "GripPipeline.h"
 
 /**
@@ -11,7 +14,7 @@ void GripPipeline::Process(cv::Mat& source0){
 	double hsvThresholdSaturation[] = {91.72661870503596, 255.0};
 	double hsvThresholdValue[] = {121.53776978417267, 246.34125636672326};
 	hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, this->hsvThresholdOutput);
-	
+
 	cv::Mat findContoursInput = hsvThresholdOutput;
 	bool findContoursExternalOnly = false;  // default Boolean
 	findContours(findContoursInput, findContoursExternalOnly, this->findContoursOutput);
@@ -30,8 +33,15 @@ void GripPipeline::Process(cv::Mat& source0){
 	double filterContoursMaxRatio = 1000;  // default Double
 	filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, this->filterContoursOutput);
 	
+	
 	std::vector<std::vector<cv::Point> > convexHullsContours = filterContoursOutput;
 	convexHulls(convexHullsContours, this->convexHullsOutput);
+
+	
+	std::vector<std::vector<cv::Point> > findPolyDPInput = convexHullsOutput;
+	double polyDPEpsilon = 10.0;
+	bool polyDPClosed = true;
+	polyDP(findPolyDPInput, polyDPEpsilon, polyDPClosed, this->polyDPOutput);
 }
 
 /**
@@ -58,7 +68,7 @@ std::vector<std::vector<cv::Point> >* GripPipeline::GetConvexHullsOutput(){
 	return &(this->convexHullsOutput);
 }
 
-cv::Mat* GripPipeline::GetPolyDPOutput(){
+std::vector<std::vector<cv::Point> >* GripPipeline::GetPolyDPOutput(){
 	return &(this->polyDPOutput);
 }
 	/**
@@ -109,22 +119,23 @@ cv::Mat* GripPipeline::GetPolyDPOutput(){
 	 * @param inputContours The contours on which to perform the operation.
 	 * @param outputContours The contours where the output will be stored.
 	 */
-	void GripPipeline::convexHulls(std::vector<std::vector<cv::Point> > &inputContours, std::vector<std::vector<cv::Point> > &outputContours) {
+	void GripPipeline::convexHulls(std::vector<std::vector<cv::Point> > &inputContours, std::vector<std::vector<cv::Point>> &outputContours) {
 		std::vector<std::vector<cv::Point> > hull (inputContours.size());
 		outputContours.clear();
 		for (size_t i = 0; i < inputContours.size(); i++ ) {
-			cv::convexHull(cv::Mat((inputContours)[i]), hull[i], false);
+			cv::convexHull(cv::Mat(inputContours[i]), hull[i], true);
 		}
 		outputContours = hull;
 	}
 
-	void GripPipeline::polyDP(std::vector<std::vector<cv::Point> > &input, double epsilon, bool closed, cv::Mat &out){
-		std::vector<std::vector<cv::Point> > hull (input.size());	
-		for (size_t i = 0; i < input.size(); i++ ) {
-			cv::approxPolyDP(cv::Mat((input)[i]), out, epsilon, closed);	
+	void GripPipeline::polyDP(std::vector<std::vector<cv::Point> > &input, double epsilon, bool closed, std::vector<std::vector<cv::Point> > &out){
+		std::vector<std::vector<cv::Point> > hull (input.size());
+		out.clear();
+			for (size_t i = 0; i < input.size(); i++ ) {
+			cv::approxPolyDP(cv::Mat(input[i]), hull[i], epsilon, closed);
 		}
-		out.convertTo(out, CV_32S);
-	}
+		out = hull;
+	}	
 
  // end grip namespace
 
