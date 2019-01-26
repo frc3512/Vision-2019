@@ -1,4 +1,4 @@
-# Copyright © 2014-2018 Tyler Veness
+# Copyright © 2014-2018 Tyler Ven- I mean William Jin
 #
 # This makefile recursively finds, compiles, and links .c and .cpp files.
 #
@@ -25,10 +25,10 @@ DEFINES :=
 LD := g++
 
 # Specify include paths with -I directives here
-IFLAGS :=
+IFLAGS := -Isrc
 
 # Specify libs with -l directives here
-LDFLAGS := -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_core
+LDFLAGS := -Lsrc/lib -lcameraserver -lcscore -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_core 
 
 SRCDIR := src
 OBJDIR := build

@@ -1,6 +1,6 @@
 // Copyright (c) 2017-2019 FRC Team 3512. All Rights Reserved.
 
-#include "DSDisplay/UdpSocket.hpp"
+#include "UdpSocket.hpp"
 
 #include <fcntl.h>
 #include <sys/socket.h>
@@ -8,7 +8,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "DSDisplay/Packet.hpp"
+#include "Packet.hpp"
 
 UdpSocket::~UdpSocket() { close(); }
 
