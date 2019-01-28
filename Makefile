@@ -13,22 +13,22 @@
 
 EXEC := cvTest
 
-CC := gcc
+CC := arm-raspbian9-linux-gnueabihf-gcc
 CFLAGS := -O3 -Wall -s -std=c11 -flto
 
-CXX := g++
+CXX := arm-raspbian9-linux-gnueabihf-g++
 CXXFLAGS := -O3 -Wall -s -std=c++1y -flto
 
 # Specify defines with -D directives here
 DEFINES :=
 
-LD := g++
+LD := arm-raspbian9-linux-gnueabihf-g++
 
 # Specify include paths with -I directives here
 IFLAGS := -Isrc
 
 # Specify libs with -l directives here
-LDFLAGS := -Lsrc/lib -lcameraserver -lcscore -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_core 
+LDFLAGS := -Lsrc/lib -lcameraserver -lcscore -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_core
 
 SRCDIR := src
 OBJDIR := build

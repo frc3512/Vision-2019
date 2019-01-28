@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <opencv4/opencv2/core/types_c.h>
+#include <opencv2/core/types_c.h>
 
 #include "GripPipeline.h"
 

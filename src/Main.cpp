@@ -6,7 +6,7 @@
 #include "cameraserver/CameraServer.h"
 
 #include "GripPipeline.h"
-#include "opencv4/opencv2/opencv.hpp"
+#include "opencv2/opencv.hpp"
 #include "UdpSocket.hpp"
 
 struct PnP {
