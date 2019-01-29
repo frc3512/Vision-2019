@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include "cscore.h"
 #include <stdio.h>
@@ -18,7 +19,19 @@ uint32_t GetIP(uint8_t byte0, uint8_t byte1, uint8_t byte2, uint8_t byte3){
 	return (byte0 << 24) | (byte1 << 16) | (byte2 << 8) | byte3;
 }
 
+std::vector<cv::Point> FindTarget(std::vector<std::vector<cv::Point>> matrix){
+    std::vector<cv::Point> vec;
+    for (size_t i = 0; i < matrix.size(); i++){
+        for (size_t j = 0; j < matrix[i].size(); j++){
+            vec.push_back(matrix[i][j]);
+        }
+    }
+
+    return 
+}
+
 int main() {
+    std::cout << "Start" << std::endl;
     GripPipeline pipe;
     cs::UsbCamera camera = frc::CameraServer::GetInstance()->StartAutomaticCapture(); // creates camera named "USB Camera 0"
     cs::CvSink cvsink = frc::CameraServer::GetInstance()->GetVideo();
@@ -32,6 +45,7 @@ int main() {
     socket.bind(socketPort);
 
     // Camera internals
+    std::cout << "GRABBING" << std::endl;
     cvsink.GrabFrameNoTimeout(input); // blocks until frame is avaliable
     double focalLengthx = input.cols;
     double focalLengthy = input.rows;
@@ -41,38 +55,35 @@ int main() {
 
     // Main loop
     while (1){
+        std::cout << "ENTERED WHILE LOOP" << std::endl;
         cvsink.GrabFrameNoTimeout(input); // blocks until frame is avaliable
         pipe.Process(input);
-        std::vector<std::vector<cv::Point>> imagePoints = *pipe.GetPolyDPOutput(); 
+        std::vector<std::vector<cv::Point>> output = *pipe.GetPolyDPOutput(); 
+        std::cout << "PROCESSED" << std::endl;
 
-        /*int count = 0;
-        double averageX = 0.0, averageY = 0.0
-        for (size_t i = 0; i < output.size(); i++){
-            for (size_t j = 0; j < output[i].size(); j++){
-                averageX += output[i][j].x;
-                averageY += output[i][j].y;
-                count++;
+        std::vector<cv::Point> imagePoints = FindTarget(output);
+
+        
+        if (imagePoints.size() < 8){
+            continue;
         }
-        average*/
 
         std::vector<cv::Point3f> modelPoints;
-        modelPoints.push_back(cv::Point3f(0, 9.38, 5.3241)); // right side tape's leftmost corner
-        modelPoints.push_back(cv::Point3f(0, 11.3165, 5.8241));
-        modelPoints.push_back(cv::Point3f(0, 12.6965, 0.5));
+        modelPoints.push_back(cv::Point3f(0, 12.6965, 0.5)); // bottom-right most corner, clockwise
         modelPoints.push_back(cv::Point3f(0, 10.76, 0));
         modelPoints.push_back(cv::Point3f(0, 0, 0));
         modelPoints.push_back(cv::Point3f(0, -1.9635, 0.5));
         modelPoints.push_back(cv::Point3f(0, -0.5565, 5.8241));
         modelPoints.push_back(cv::Point3f(0, 1.38, 5.3241));
+        modelPoints.push_back(cv::Point3f(0, 9.38, 5.3241)); 
+        modelPoints.push_back(cv::Point3f(0, 11.3165, 5.8241));
         cv::Mat rotationMatrix, translationMatrix;
         cv::solvePnPRansac(modelPoints, imagePoints, cameraMatrix, distortionMatrix, rotationMatrix, translationMatrix);
-        
+        std::cout << "SOLVED" << std::endl;
+
         PnP pnp;
         pnp.rotation = rotationMatrix, pnp.translation = translationMatrix;
         socket.send(&pnp, sizeof(pnp), ip, socketPort);
-    }
-
-
-
-    
-}   
+        std::cout << "SENT" << std::endl;
+    }  
+} 

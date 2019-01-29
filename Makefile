@@ -28,7 +28,7 @@ LD := arm-raspbian9-linux-gnueabihf-g++
 IFLAGS := -Isrc
 
 # Specify libs with -l directives here
-LDFLAGS := -Lsrc/lib -lcameraserver -lcscore -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_core
+LDFLAGS := -Lsrc/lib -lcameraserver -lcscore -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_core -lwpilibc -lntcore -lwpiutil -lopencv_ml -lopencv_objdetect -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_calib3d -lopencv_features2d -lopencv_flann -lopencv_photo -lopencv_video -lopencv_videoio -lwpiHal
 
 SRCDIR := src
 OBJDIR := build

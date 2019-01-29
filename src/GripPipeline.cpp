@@ -1,5 +1,5 @@
+#include <iostream>
 #include <algorithm>
-#include <opencv2/core/types_c.h>
 
 #include "GripPipeline.h"
 
@@ -14,10 +14,12 @@ void GripPipeline::Process(cv::Mat& source0){
 	double hsvThresholdSaturation[] = {91.72661870503596, 255.0};
 	double hsvThresholdValue[] = {121.53776978417267, 246.34125636672326};
 	hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, this->hsvThresholdOutput);
+	std::cout << "hsvThreshold" << std::endl;
 
 	cv::Mat findContoursInput = hsvThresholdOutput;
 	bool findContoursExternalOnly = false;  // default Boolean
 	findContours(findContoursInput, findContoursExternalOnly, this->findContoursOutput);
+	std::cout << "findContours" << std::endl;
 
 	std::vector<std::vector<cv::Point> > filterContoursContours = findContoursOutput;
 	double filterContoursMinArea = 50.0;  // default Double
@@ -32,16 +34,17 @@ void GripPipeline::Process(cv::Mat& source0){
 	double filterContoursMinRatio = 0;  // default Double
 	double filterContoursMaxRatio = 1000;  // default Double
 	filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, this->filterContoursOutput);
-	
+	std::cout << "filterContours" << std::endl;
 	
 	std::vector<std::vector<cv::Point> > convexHullsContours = filterContoursOutput;
 	convexHulls(convexHullsContours, this->convexHullsOutput);
-
+	std::cout << "convexHulls" << std::endl;
 	
 	std::vector<std::vector<cv::Point> > findPolyDPInput = convexHullsOutput;
 	double polyDPEpsilon = 10.0;
 	bool polyDPClosed = true;
 	polyDP(findPolyDPInput, polyDPEpsilon, polyDPClosed, this->polyDPOutput);
+	std::cout << "polyDP" << std::endl;
 }
 
 /**
@@ -123,7 +126,7 @@ std::vector<std::vector<cv::Point> >* GripPipeline::GetPolyDPOutput(){
 		std::vector<std::vector<cv::Point> > hull (inputContours.size());
 		outputContours.clear();
 		for (size_t i = 0; i < inputContours.size(); i++ ) {
-			cv::convexHull(cv::Mat(inputContours[i]), hull[i], true);
+			cv::convexHull(cv::Mat(inputContours[i]), hull[i], false);
 		}
 		outputContours = hull;
 	}
