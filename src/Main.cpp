@@ -54,17 +54,17 @@ int main() {
     GripPipeline pipe;
     cs::UsbCamera camera = frc::CameraServer::GetInstance()->StartAutomaticCapture(); // creates camera named "USB Camera 0"
     cs::CvSink cvsink = frc::CameraServer::GetInstance()->GetVideo();
-    cs::MjpegServer server{"Server", 1182};
+    // cs::MjpegServer server{"Server", 1182};
     uint16_t socketPort = 5001;
     uint32_t ip = GetIP(10, 35, 12, 2);
     UdpSocket socket;
     cv::Mat input;
 
     socket.bind(socketPort);
+    camera.SetResolution(640, 480);
     camera.SetExposureManual(0);
-    server.SetSource(camera);
+    // server.SetSource(camera);
 
-    
     // Camera internals
     std::cout << "GRABBING" << std::endl;
     cvsink.GrabFrameNoTimeout(input); // blocks until frame is avaliable
@@ -74,13 +74,14 @@ int main() {
     cv::Mat cameraMatrix = (cv::Mat_<double>(3,3) << focalLengthx, 0, center.x, 0, focalLengthy, center.y, 0, 0, 1);
     cv::Mat distortionMatrix = cv::Mat::zeros(4,1,cv::DataType<double>::type); // no distortion assumed
     std::vector<cv::Point3f> modelPoints;
-    modelPoints.push_back(cv::Point3f(0, 12.6965, 0.5)); // bottom-right most corner, clockwise        modelPoints.push_back(cv::Point3f(0, 10.76, 0));
-    modelPoints.push_back(cv::Point3f(0, 0, 0));
-    modelPoints.push_back(cv::Point3f(0, -1.9635, 0.5));
-    modelPoints.push_back(cv::Point3f(0, -0.5565, 5.8241));
-    modelPoints.push_back(cv::Point3f(0, 1.38, 5.3241));
-    modelPoints.push_back(cv::Point3f(0, 9.38, 5.3241)); 
-    modelPoints.push_back(cv::Point3f(0, 11.3165, 5.8241));    
+    modelPoints.emplace_back(0, 12.6965, 0.5); // bottom-right most corner, clockwise        
+    modelPoints.emplace_back(0, 10.76, 0);
+    modelPoints.emplace_back(0, 0, 0);
+    modelPoints.emplace_back(0, -1.9635, 0.5);
+    modelPoints.emplace_back(0, -0.5565, 5.8241);
+    modelPoints.emplace_back(0, 1.38, 5.3241);
+    modelPoints.emplace_back(cv::Point3f(0, 9.38, 5.3241); 
+    modelPoints.emplace_back(cv::Point3f(0, 11.3165, 5.8241);    
     // Main loop
     while (1){
         std::cout << "ENTERED WHILE LOOP" << std::endl;
