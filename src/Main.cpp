@@ -52,9 +52,10 @@ std::vector<cv::Point> FindTarget(std::vector<std::vector<cv::Point>> matrix){
 int main() {
     std::cout << "Start" << std::endl;
     GripPipeline pipe;
-    cs::UsbCamera camera = frc::CameraServer::GetInstance()->StartAutomaticCapture(); // creates camera named "USB Camera 0"
+    cs::UsbCamera camera = frc::CameraServer::GetInstance()->StartAutomaticCapture();
+    cs::UsbCamera rawCamera = frc::CameraServer::GetInstance()->StartAutomaticCapture();
     cs::CvSink cvsink = frc::CameraServer::GetInstance()->GetVideo();
-    // cs::MjpegServer server{"Server", 1182};
+    cs::MjpegServer server{"DriverView", 1128 };
     uint16_t socketPort = 5001;
     uint32_t ip = GetIP(10, 35, 12, 2);
     UdpSocket socket;
@@ -63,7 +64,9 @@ int main() {
     socket.bind(socketPort);
     camera.SetResolution(640, 480);
     camera.SetExposureManual(0);
-    // server.SetSource(camera);
+    rawCamera.SetResolution(640, 480);
+    rawCamera.SetExposureManual(0);
+    server.SetSource(rawCamera);
 
     // Camera internals
     std::cout << "GRABBING" << std::endl;
@@ -80,8 +83,8 @@ int main() {
     modelPoints.emplace_back(0, -1.9635, 0.5);
     modelPoints.emplace_back(0, -0.5565, 5.8241);
     modelPoints.emplace_back(0, 1.38, 5.3241);
-    modelPoints.emplace_back(cv::Point3f(0, 9.38, 5.3241); 
-    modelPoints.emplace_back(cv::Point3f(0, 11.3165, 5.8241);    
+    modelPoints.emplace_back(cv::Point3f(0, 9.38, 5.3241)); 
+    modelPoints.emplace_back(cv::Point3f(0, 11.3165, 5.8241));    
     // Main loop
     while (1){
         std::cout << "ENTERED WHILE LOOP" << std::endl;
