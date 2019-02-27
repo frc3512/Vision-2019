@@ -83,15 +83,13 @@ int main() {
     modelPoints.emplace_back(0, -1.9635, 0.5);
     modelPoints.emplace_back(0, -0.5565, 5.8241);
     modelPoints.emplace_back(0, 1.38, 5.3241);
-    modelPoints.emplace_back(cv::Point3f(0, 9.38, 5.3241)); 
-    modelPoints.emplace_back(cv::Point3f(0, 11.3165, 5.8241));    
+    modelPoints.emplace_back(0, 9.38, 5.3241); 
+    modelPoints.emplace_back(0, 11.3165, 5.8241);    
     // Main loop
     while (1){
-        std::cout << "ENTERED WHILE LOOP" << std::endl;
         cvsink.GrabFrameNoTimeout(input); // blocks until frame is avaliable
         pipe.Process(input);
         std::vector<std::vector<cv::Point>> output = *pipe.GetPolyDPOutput(); 
-        std::cout << "PROCESSED" << std::endl;
 
         std::vector<cv::Point> imagePoints = FindTarget(output);
         
@@ -101,11 +99,9 @@ int main() {
 
         cv::Mat rotationMatrix, translationMatrix;
         cv::solvePnPRansac(modelPoints, imagePoints, cameraMatrix, distortionMatrix, rotationMatrix, translationMatrix);
-        std::cout << "SOLVED" << std::endl;
 
         PnP pnp;
         pnp.rotation = rotationMatrix, pnp.translation = translationMatrix;
         socket.send(&pnp, sizeof(pnp), ip, socketPort);
-        std::cout << "SENT" << std::endl;
     }  
 } 
