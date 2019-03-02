@@ -51,7 +51,7 @@ std::vector<cv::Point> FindTarget(std::vector<std::vector<cv::Point>> matrix){
 
 int main() {
     std::cout << "Start" << std::endl;
-    GripPipeline pipe;
+    grip::GripPipeline pipe;
     cs::UsbCamera camera = frc::CameraServer::GetInstance()->StartAutomaticCapture();
     cs::UsbCamera rawCamera = frc::CameraServer::GetInstance()->StartAutomaticCapture();
     cs::CvSink cvsink = frc::CameraServer::GetInstance()->GetVideo();

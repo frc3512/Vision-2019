@@ -1,6 +1,6 @@
 build/src/GripPipeline.o: src/GripPipeline.cpp src/GripPipeline.h \
- src/opencv2/objdetect/objdetect.hpp src/opencv2/objdetect.hpp \
- src/opencv2/core.hpp src/opencv2/core/cvdef.h \
+ src/vision/VisionPipeline.h src/opencv2/objdetect/objdetect.hpp \
+ src/opencv2/objdetect.hpp src/opencv2/core.hpp src/opencv2/core/cvdef.h \
  src/opencv2/core/hal/interface.h src/opencv2/core/cv_cpu_dispatch.h \
  src/opencv2/core/version.hpp src/opencv2/core/base.hpp \
  src/opencv2/opencv_modules.hpp src/opencv2/core/cvstd.hpp \
