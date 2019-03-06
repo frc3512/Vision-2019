@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include "cscore.h"
@@ -20,14 +21,32 @@ uint32_t GetIP(uint8_t byte0, uint8_t byte1, uint8_t byte2, uint8_t byte3){
 }
 
 std::vector<cv::Point> FindTarget(std::vector<std::vector<cv::Point>> matrix){
+    // Converts vector of vector of points to vector of points
     std::vector<cv::Point> vec;
-    for (size_t i = 0; i < matrix.size(); i++){ // converts vector of vector of points to vector of points
+    for (size_t i = 0; i < matrix.size(); i++){ 
         for (size_t j = 0; j < matrix[i].size(); j++){
             vec.push_back(matrix[i][j]);
         }
     }
-    for (size_t i = 0; i < vec.size(); i++){ // find the first corner, which should have a reasonable positive slope
-        if (vec[i+1].y - vec[i].y > 25){ // TODO: find a reasonable tolerance 
+
+    // Finds an average center from all the points
+    static double avgX = 0.0, avgY = 0.0;
+    for (const auto& p : vec) {
+        avgX += p.x;
+        avgY += p.y;
+    }
+    avgX /= vec.size();
+    avgY /= vec.size();
+
+    // Sorts all points CCW from the postive x axis assuming (avgX, avgY) is the origin
+    std::sort(vec.begin(), vec.end(), [] (const auto& lhs, const auto& rhs) {
+        double lhsAngle = std::atan2(lhs.y - avgY, lhs.x - avgX);
+        double rhsAngle = std::atan2(rhs.y - avgY, rhs.x - avgX);
+        return lhsAngle < rhsAngle;
+    });
+    
+    /*for (size_t i = 0; i < vec.size(); i++){ // find the first corner, which should have a reasonable positive slope
+        if (vec[i+1].y - vec[i  ].y > 25){ // TODO: find a reasonable tolerance 
             break;
         } else {
             vec.erase(vec.begin() + i);
@@ -45,7 +64,10 @@ std::vector<cv::Point> FindTarget(std::vector<std::vector<cv::Point>> matrix){
     for (size_t i = 8; i < vec.size(); i++){ // skips the next 3 points and deletes the rest
         vec.erase(vec.begin() + i);
         i--;
-    } 
+    }
+    for (size_t i = 0; i < vec.size(); i++){
+        std::cout << i << ": (" << vec[i].x << ", " << vec[i].y << ")" << std::endl;
+    }*/
     return vec;
 }
 
@@ -77,14 +99,14 @@ int main() {
     cv::Mat cameraMatrix = (cv::Mat_<double>(3,3) << focalLengthx, 0, center.x, 0, focalLengthy, center.y, 0, 0, 1);
     cv::Mat distortionMatrix = cv::Mat::zeros(4,1,cv::DataType<double>::type); // no distortion assumed
     std::vector<cv::Point3f> modelPoints;
-    modelPoints.emplace_back(0, 12.6965, 0.5); // bottom-right most corner, clockwise        
-    modelPoints.emplace_back(0, 10.76, 0);
-    modelPoints.emplace_back(0, 0, 0);
-    modelPoints.emplace_back(0, -1.9635, 0.5);
-    modelPoints.emplace_back(0, -0.5565, 5.8241);
-    modelPoints.emplace_back(0, 1.38, 5.3241);
+    modelPoints.emplace_back(0, 11.3165, 5.8241); // top-right most corner, counter-clockwise (in inches)
     modelPoints.emplace_back(0, 9.38, 5.3241); 
-    modelPoints.emplace_back(0, 11.3165, 5.8241);    
+    modelPoints.emplace_back(0, 1.38, 5.3241);
+    modelPoints.emplace_back(0, -0.5565, 5.8241);
+    modelPoints.emplace_back(0, -1.9635, 0.5);
+    modelPoints.emplace_back(0, 0, 0);
+    modelPoints.emplace_back(0, 10.76, 0);
+    modelPoints.emplace_back(0, 12.6965, 0.5);         
     // Main loop
     while (1){
         cvsink.GrabFrameNoTimeout(input); // blocks until frame is avaliable
@@ -94,6 +116,7 @@ int main() {
         std::vector<cv::Point> imagePoints = FindTarget(output);
         
         if (imagePoints.size() != 8){
+	        std::cout << imagePoints.size() << "points, continuing"  << std::endl;
             continue;
         }
 
