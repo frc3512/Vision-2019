@@ -45,16 +45,17 @@ std::vector<cv::Point> FindTarget(std::vector<std::vector<cv::Point>> matrix){
         return lhsAngle < rhsAngle;
     });
     
-    /*for (size_t i = 0; i < vec.size(); i++){ // find the first corner, which should have a reasonable positive slope
-        if (vec[i+1].y - vec[i  ].y > 25){ // TODO: find a reasonable tolerance 
+    for (size_t i = 0; i < vec.size(); i++){ // find the first corner, which should have a reasonable positive slope
+        if (vec[i+1].y - vec[i].y > 1){ // TODO: find a reasonable tolerance 
             break;
         } else {
             vec.erase(vec.begin() + i);
             i--;
         }
     }
+
     for (size_t i = 4; i < vec.size(); i++){ // skips the next 3 points 
-        if (vec[i-1].y - vec[i].y > 70) { // TODO: find a reasonable tolerance
+        if (vec[i].y - vec[i-1].y > 30) { // TODO: find a reasonable tolerance
             break;
         } else {
             vec.erase(vec.begin() + i);
@@ -67,7 +68,7 @@ std::vector<cv::Point> FindTarget(std::vector<std::vector<cv::Point>> matrix){
     }
     for (size_t i = 0; i < vec.size(); i++){
         std::cout << i << ": (" << vec[i].x << ", " << vec[i].y << ")" << std::endl;
-    }*/
+    }
     return vec;
 }
 
@@ -87,7 +88,6 @@ int main() {
     camera.SetResolution(640, 480);
     camera.SetExposureManual(0);
     rawCamera.SetResolution(640, 480);
-    rawCamera.SetExposureManual(0);
     server.SetSource(rawCamera);
 
     // Camera internals
@@ -114,7 +114,7 @@ int main() {
         std::vector<std::vector<cv::Point>> output = *pipe.GetPolyDPOutput(); 
 
         std::vector<cv::Point> imagePoints = FindTarget(output);
-        
+          
         if (imagePoints.size() != 8){
 	        std::cout << imagePoints.size() << "points, continuing"  << std::endl;
             continue;
@@ -128,3 +128,4 @@ int main() {
         socket.send(&pnp, sizeof(pnp), ip, socketPort);
     }  
 } 
+    
