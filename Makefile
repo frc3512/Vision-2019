@@ -25,7 +25,7 @@ DEFINES :=
 LD := arm-raspbian9-linux-gnueabihf-g++
 
 # Specify include paths with -I directives here
-IFLAGS := -Isrc
+IFLAGS := -Isrc -Isrc/thirdparty
 
 # Specify libs with -l directives here
 LDFLAGS := -Lbuild/example-cpp-2019.3.1/cpp-multiCameraServer/lib -lwpilibc -lwpiHal -lcameraserver -lntcore -lcscore -lopencv_calib3d -lopencv_imgproc -lopencv_core -lwpiutil -Wl,--unresolved-symbols=ignore-in-shared-libs

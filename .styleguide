@@ -1,0 +1,25 @@
+cppHeaderFileInclude {
+  \.h$
+  \.hpp$
+  \.inl$
+  \.inc$
+}
+
+cppSrcFileInclude {
+  \.cpp$
+}
+
+modifiableFileExclude {
+  src/thirdparty/
+}
+
+includeOtherLibs {
+  cameraserver/
+  opencv2/
+  vision/
+  cscore\.h$
+}
+
+generatedFileExclude {
+  thirdparty/
+}
