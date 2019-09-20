@@ -22,12 +22,14 @@ def download_file(file_url, dest_dir):
     filename = os.path.split(file_url)[1]
     dest_file = f"{dest_dir}/{filename}"
     if not os.path.exists(dest_file):
+        os.makedirs(dest_dir)
         print(f"Downloading {filename}...")
         print(f"Querying {file_url}")
         urlretrieve(url=file_url, filename=dest_file, reporthook=dl_progress)
         print(" done.")
     folder_name = f"{dest_dir}/{os.path.splitext(filename)[0]}"
     if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
         print(f"Unzipping {dest_file}...", end="")
         sys.stdout.flush()
         subprocess.run(["unzip", "-q", "-d", folder_name, f"{dest_file}"])

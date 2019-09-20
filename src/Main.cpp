@@ -24,9 +24,10 @@ uint32_t GetIP(uint8_t byte0, uint8_t byte1, uint8_t byte2, uint8_t byte3) {
     return (byte0 << 24) | (byte1 << 16) | (byte2 << 8) | byte3;
 }
 
-std::vector<cv::Point> FindTarget(std::vector<std::vector<cv::Point>> matrix) {
+std::vector<cv::Point2f> FindTarget(
+    std::vector<std::vector<cv::Point>> matrix) {
     // Converts vector of vector of points to vector of points
-    std::vector<cv::Point> vec;
+    std::vector<cv::Point2f> vec;
     for (size_t i = 0; i < matrix.size(); i++) {
         for (size_t j = 0; j < matrix[i].size(); j++) {
             vec.push_back(matrix[i][j]);
@@ -97,8 +98,8 @@ int main() {
     cv::Mat input;
 
     socket.bind(socketPort);
-    camera.SetResolution(640, 480);
     camera.SetExposureManual(0);
+    camera.SetResolution(640, 480);
     rawCamera.SetResolution(640, 480);
     server.SetSource(rawCamera);
 
@@ -129,7 +130,7 @@ int main() {
         pipe.Process(input);
         std::vector<std::vector<cv::Point>> output = *pipe.GetPolyDPOutput();
 
-        std::vector<cv::Point> imagePoints = FindTarget(output);
+        std::vector<cv::Point2f> imagePoints = FindTarget(output);
 
         if (imagePoints.size() != 8) {
             std::cout << imagePoints.size() << "points, continuing"
@@ -143,6 +144,12 @@ int main() {
 
         PnP pnp;
         pnp.rotation = rotationMatrix, pnp.translation = translationMatrix;
+        cv::Mat rotationMat{3, 3, CV_8UC1};
+        cv::Rodrigues(pnp.rotation, rotationMat);
+
+        std::cout << "Rotation: " << rotationMat << std::endl;
+        std::cout << "Translation: " << pnp.translation << std::endl;
+
         socket.send(&pnp, sizeof(pnp), ip, socketPort);
     }
 }
