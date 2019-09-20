@@ -4,6 +4,7 @@ import argparse
 import os
 import subprocess
 import sys
+import tarfile
 from urllib.request import urlretrieve
 
 
@@ -21,18 +22,24 @@ def download_file(file_url, dest_dir):
     """
     filename = os.path.split(file_url)[1]
     dest_file = f"{dest_dir}/{filename}"
-    if not os.path.exists(dest_file):
-        os.makedirs(dest_dir)
+    if os.path.splitext(filename)[1] == ".gz":
+        folder_name = f"{dest_dir}/{os.path.splitext(os.path.splitext(filename)[0])[0]}"
+    else:
+        folder_name = f"{dest_dir}/{os.path.splitext(filename)[0]}"
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
         print(f"Downloading {filename}...")
         print(f"Querying {file_url}")
         urlretrieve(url=file_url, filename=dest_file, reporthook=dl_progress)
         print(" done.")
-    folder_name = f"{dest_dir}/{os.path.splitext(filename)[0]}"
-    if not os.path.exists(folder_name):
-        os.makedirs(folder_name)
         print(f"Unzipping {dest_file}...", end="")
         sys.stdout.flush()
-        subprocess.run(["unzip", "-q", "-d", folder_name, f"{dest_file}"])
+        if os.path.splitext(filename)[1] == ".gz":
+            tar = tarfile.open(dest_file)
+            tar.extractall(path=folder_name)
+            tar.close()
+        else:
+            subprocess.run(["unzip", "-q", "-d", folder_name, f"{dest_file}"])
         print(" done.")
 
 
@@ -41,6 +48,9 @@ def main():
         "https://github.com/wpilibsuite/FRCVision-pi-gen/releases/download/v2019.3.1/example-cpp-2019.3.1.zip",
         "build",
     )
+    download_file(
+        "https://github.com/wpilibsuite/raspbian-toolchain/releases/download/v1.3.0/Raspbian9-Linux-Toolchain-6.3.0.tar.gz",
+        "build")
     subprocess.run(["make"])
 
 

@@ -1,5 +1,3 @@
-# Copyright © 2014-2018 Tyler Ven- I mean William Jin
-#
 # This makefile recursively finds, compiles, and links .c and .cpp files.
 #
 # The following targets are supported by this makefile. Indentations represent
@@ -13,16 +11,16 @@
 
 EXEC := cvTest
 
-CC := arm-raspbian9-linux-gnueabihf-gcc
+CC := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-gcc
 CFLAGS := -O3 -Wall -s -std=c11 -flto
 
-CXX := arm-raspbian9-linux-gnueabihf-g++
+CXX := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
 CXXFLAGS := -O3 -Wall -s -std=c++1y -flto
 
 # Specify defines with -D directives here
 DEFINES :=
 
-LD := arm-raspbian9-linux-gnueabihf-g++
+LD := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
 
 # Specify include paths with -I directives here
 IFLAGS := -Isrc -Isrc/thirdparty
