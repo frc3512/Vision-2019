@@ -14,8 +14,8 @@ EXEC := cvTest
 CC := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-gcc
 CFLAGS := -O3 -Wall -s -std=c11 -flto
 
-CXX := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
-CXXFLAGS := -O3 -Wall -s -std=c++1y -flto
+CPP := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
+CPPFLAGS := -O3 -Wall -s -std=c++14 -flto
 
 # Specify defines with -D directives here
 DEFINES :=
@@ -26,7 +26,11 @@ LD := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gn
 IFLAGS := -Isrc -Isrc/thirdparty
 
 # Specify libs with -l directives here
-LDFLAGS := -Lbuild/example-cpp-2019.3.1/cpp-multiCameraServer/lib -lwpilibc -lwpiHal -lcameraserver -lntcore -lcscore -lopencv_calib3d -lopencv_imgproc -lopencv_core -lwpiutil -Wl,--unresolved-symbols=ignore-in-shared-libs
+LDFLAGS := -Lbuild/example-cpp-2019.3.1/cpp-multiCameraServer/lib -lwpilibc \
+	-lwpiHal -lcameraserver -lntcore -lcscore -lopencv_calib3d -lopencv_imgproc \
+	-lopencv_core -lwpiutil -Wl,--unresolved-symbols=ignore-in-shared-libs
+
+BUILDSYS := make.py Makefile
 
 SRCDIR := src
 OBJDIR := build
@@ -38,36 +42,36 @@ rwildcard=$(wildcard $1$2) $(foreach dir,$(wildcard $1*),$(call rwildcard,$(dir)
 SRC_C := $(call rwildcard,$(SRCDIR)/,*.c)
 
 # Recursively find all C++ source files
-SRC_CXX := $(call rwildcard,$(SRCDIR)/,*.cpp)
+SRC_CPP := $(call rwildcard,$(SRCDIR)/,*.cpp)
 
 # Create raw list of object files
-C_OBJ := $(SRC_C:.c=.o)
-CXX_OBJ := $(SRC_CXX:.cpp=.o)
+OBJ_C := $(SRC_C:.c=.o)
+OBJ_CPP := $(SRC_CPP:.cpp=.o)
 
 # Create list of object files for build
-C_OBJ := $(addprefix $(OBJDIR)/,$(C_OBJ))
-CXX_OBJ := $(addprefix $(OBJDIR)/,$(CXX_OBJ))
+OBJ_C := $(addprefix $(OBJDIR)/,$(OBJ_C))
+OBJ_CPP := $(addprefix $(OBJDIR)/,$(OBJ_CPP))
 
-.PHONY: all
-all: $(OBJDIR)/$(EXEC)
+.PHONY: build
+build: $(OBJDIR)/$(EXEC)
 
--include $(C_OBJ:.o=.d) $(CXX_OBJ:.o=.d)
+-include $(OBJ_C:.o=.d) $(OBJ_CPP:.o=.d)
 
-$(OBJDIR)/$(EXEC): $(C_OBJ) $(CXX_OBJ)
+$(OBJDIR)/$(EXEC): $(OBJ_C) $(OBJ_CPP)
 	@mkdir -p $(@D)
-	@echo Linking $@
+	@echo [LD] $@
 ifdef VERBOSE
-	$(LD) -o $@ $(C_OBJ) $(CXX_OBJ) $(LDFLAGS)
+	$(LD) -o $@ $+ $(LDFLAGS)
 else
-	@$(LD) -o $@ $(C_OBJ) $(CXX_OBJ) $(LDFLAGS)
+	@$(LD) -o $@ $+ $(LDFLAGS)
 endif
 
 # Pattern rule for building object file from C source
 # The -MMD flag generates .d files to track changes in header files included in
 # the source.
-$(C_OBJ): $(OBJDIR)/%.o: %.c
+$(OBJDIR)/%.o: %.c $(BUILDSYS)
 	@mkdir -p $(@D)
-	@echo Building C object $@
+	@echo [C] $@
 ifdef VERBOSE
 	$(CC) $(CFLAGS) $(DEFINES) $(IFLAGS) -MMD -c -o $@ $<
 else
@@ -77,13 +81,13 @@ endif
 # Pattern rule for building object file from C++ source
 # The -MMD flag generates .d files to track changes in header files included in
 # the source.
-$(CXX_OBJ): $(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp $(BUILDSYS)
 	@mkdir -p $(@D)
-	@echo Building CXX object $@
+	@echo [CPP] $@
 ifdef VERBOSE
-	$(CXX) $(CXXFLAGS) $(DEFINES) $(IFLAGS) -MMD -c -o $@ $<
+	$(CPP) $(CPPFLAGS) $(DEFINES) $(IFLAGS) -MMD -c -o $@ $<
 else
-	@$(CXX) $(CXXFLAGS) $(DEFINES) $(IFLAGS) -MMD -c -o $@ $<
+	@$(CPP) $(CPPFLAGS) $(DEFINES) $(IFLAGS) -MMD -c -o $@ $<
 endif
 
 # Cleans the build directory

@@ -44,6 +44,15 @@ def download_file(file_url, dest_dir):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Builds 2019 vision program")
+    parser.add_argument(
+        "target",
+        choices=["build", "clean"],
+        help=
+        "'build' compiles the vision program and downloads missing dependencies. 'clean' removes all build artifacts from the build folder.",
+    )
+    args = parser.parse_args()
+
     download_file(
         "https://github.com/wpilibsuite/FRCVision-pi-gen/releases/download/v2019.3.1/example-cpp-2019.3.1.zip",
         "build",
@@ -51,7 +60,12 @@ def main():
     download_file(
         "https://github.com/wpilibsuite/raspbian-toolchain/releases/download/v1.3.0/Raspbian9-Linux-Toolchain-6.3.0.tar.gz",
         "build")
-    subprocess.run(["make"])
+
+    nproc = subprocess.check_output("nproc", encoding="utf-8").strip()
+    if args.target == "build":
+        subprocess.run(["make", "build", f"-j{nproc}"])
+    elif args.target == "clean":
+        subprocess.run(["make", "clean"])
 
 
 if __name__ == "__main__":
