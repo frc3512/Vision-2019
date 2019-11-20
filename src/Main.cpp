@@ -138,18 +138,17 @@ int main() {
             continue;
         }
 
-        cv::Mat rotationMatrix, translationMatrix;
+        // 3x1 vectors
+        cv::Mat rVec, tVec;
         cv::solvePnPRansac(modelPoints, imagePoints, cameraMatrix,
-                           distortionMatrix, rotationMatrix, translationMatrix);
+                           distortionMatrix, rVec, tVec);
 
-        PnP pnp;
-        pnp.rotation = rotationMatrix, pnp.translation = translationMatrix;
-        cv::Mat rotationMat{3, 3, CV_8UC1};
-        cv::Rodrigues(pnp.rotation, rotationMat);
+        double pose[] = {tVec.at<double>(0, 0), tVec.at<double>(1, 0),
+                         rVec.at<double>(2, 0)};
 
-        std::cout << "Rotation: " << rotationMat << std::endl;
-        std::cout << "Translation: " << pnp.translation << std::endl;
+        std::cout << "x: " << pose[0] << " y: " << pose[1]
+                  << " Theta: " << pose[2] << std::endl;
 
-        socket.send(&pnp, sizeof(pnp), ip, socketPort);
+        socket.send(&pose, sizeof(pose), ip, socketPort);
     }
 }
