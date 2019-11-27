@@ -11,9 +11,9 @@ void GripPipeline::Process(cv::Mat& source0) {
     // Step HSV_Threshold0:
     // input
     cv::Mat hsvThresholdInput = source0;
-    double hsvThresholdHue[] = {53.41726618705036, 95.9592529711375};
+    double hsvThresholdHue[] = {50.5490743800213, 76.57307555259779};
     double hsvThresholdSaturation[] = {0.0, 255.0};
-    double hsvThresholdValue[] = {66.50179856115108, 146.76570458404075};
+    double hsvThresholdValue[] = {66.50179856115108, 178.83337917136512};
     hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation,
                  hsvThresholdValue, this->hsvThresholdOutput);
     // Step Find_Contours0:
@@ -26,17 +26,17 @@ void GripPipeline::Process(cv::Mat& source0) {
     // input
     std::vector<std::vector<cv::Point> > filterContoursContours =
         findContoursOutput;
-    double filterContoursMinArea = 50.0;      // default Double
-    double filterContoursMinPerimeter = 0.0;  // default Double
-    double filterContoursMinWidth = 0.0;      // default Double
-    double filterContoursMaxWidth = 1000.0;   // default Double
-    double filterContoursMinHeight = 50.0;    // default Double
-    double filterContoursMaxHeight = 1000.0;  // default Double
-    double filterContoursSolidity[] = {0, 100};
-    double filterContoursMaxVertices = 1000000.0;  // default Double
-    double filterContoursMinVertices = 0.0;        // default Double
-    double filterContoursMinRatio = 0.0;           // default Double
-    double filterContoursMaxRatio = 1000.0;        // default Double
+    double filterContoursMinArea = 100.0;      // default Double
+    double filterContoursMinPerimeter = 50.0;  // default Double
+    double filterContoursMinWidth = 10.0;      // default Double
+    double filterContoursMaxWidth = 10000.0;   // default Double
+    double filterContoursMinHeight = 20.0;     // default Double
+    double filterContoursMaxHeight = 10000.0;  // default Double
+    double filterContoursSolidity[] = {0, 100.0};
+    double filterContoursMaxVertices = 10000.0;  // default Double
+    double filterContoursMinVertices = 0.0;      // default Double
+    double filterContoursMinRatio = 0.0;         // default Double
+    double filterContoursMaxRatio = 1000.0;      // default Double
     filterContours(filterContoursContours, filterContoursMinArea,
                    filterContoursMinPerimeter, filterContoursMinWidth,
                    filterContoursMaxWidth, filterContoursMinHeight,
@@ -51,9 +51,8 @@ void GripPipeline::Process(cv::Mat& source0) {
     convexHulls(convexHullsContours, this->convexHullsOutput);
 
     std::vector<std::vector<cv::Point> > findPolyDPInput = convexHullsOutput;
-    double polyDPEpsilon = 10.0;
     bool polyDPClosed = true;
-    polyDP(findPolyDPInput, polyDPEpsilon, polyDPClosed, this->polyDPOutput);
+    polyDP(findPolyDPInput, polyDPClosed, this->polyDPOutput);
 }
 
 /**
@@ -182,11 +181,12 @@ void GripPipeline::convexHulls(
 }
 
 void GripPipeline::polyDP(std::vector<std::vector<cv::Point> >& input,
-                          double epsilon, bool closed,
+                          bool closed,
                           std::vector<std::vector<cv::Point> >& out) {
     std::vector<std::vector<cv::Point> > hull(input.size());
     out.clear();
     for (size_t i = 0; i < input.size(); i++) {
+        double epsilon = 0.005 * cv::arcLength(input[i], true);
         cv::approxPolyDP(cv::Mat(input[i]), hull[i], epsilon, closed);
     }
     out = hull;

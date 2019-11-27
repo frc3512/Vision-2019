@@ -14,6 +14,8 @@
 
 #include "GripPipeline.h"
 #include "UdpSocket.hpp"
+#include "subprocess.hpp"
+#include "thirdparty/units.h"
 
 struct PnP {
     cv::Mat rotation;
@@ -76,64 +78,74 @@ std::vector<cv::Point2f> FindTarget(
         vec.erase(vec.begin() + i);
         i--;
     }
-    for (size_t i = 0; i < vec.size(); i++) {
+    /* for (size_t i = 0; i < vec.size(); i++) {
         std::cout << i << ": (" << vec[i].x << ", " << vec[i].y << ")"
                   << std::endl;
-    }
+    } */
     return vec;
 }
 
 int main() {
     std::cout << "Start" << std::endl;
     grip::GripPipeline pipe;
-    cs::UsbCamera camera =
+    cs::UsbCamera cvCamera =
         frc::CameraServer::GetInstance()->StartAutomaticCapture();
-    cs::UsbCamera rawCamera =
+    cs::UsbCamera driverCamera =
         frc::CameraServer::GetInstance()->StartAutomaticCapture();
-    cs::CvSink cvsink = frc::CameraServer::GetInstance()->GetVideo();
+    cs::CvSink cvSink = frc::CameraServer::GetInstance()->GetVideo();
     cs::MjpegServer server{"DriverView", 1128};
     uint16_t socketPort = 5001;
     uint32_t ip = GetIP(10, 35, 12, 2);
     UdpSocket socket;
     cv::Mat input;
+    cs::CvSource CvSource;
 
     socket.bind(socketPort);
-    camera.SetExposureManual(0);
-    camera.SetResolution(640, 480);
-    rawCamera.SetResolution(640, 480);
-    server.SetSource(rawCamera);
+    // cvCamera.SetExposureManual(4);
+    // cvCamera.SetExposureHoldCurrent();
+    cvCamera.SetResolution(1080, 720);
+    driverCamera.SetResolution(640, 480);
+    cvCamera.GetProperty("auto_exposure_bias").Set(0);
+    cvCamera.GetProperty("exposure_time_absolute").Set(0);
+    cvCamera.SetBrightness(31);
+    cvCamera.GetProperty("saturation").Set(65);
+    cvCamera.GetProperty("sharpness").Set(100);
+
+    server.SetSource(cvCamera);
 
     // Camera internals
     std::cout << "GRABBING" << std::endl;
-    cvsink.GrabFrameNoTimeout(input);  // blocks until frame is avaliable
-    double focalLengthx = input.cols;
-    double focalLengthy = input.rows;
-    cv::Point2d center = cv::Point2d(input.cols / 2, input.rows / 2);
-    cv::Mat cameraMatrix = (cv::Mat_<double>(3, 3) << focalLengthx, 0, center.x,
-                            0, focalLengthy, center.y, 0, 0, 1);
-    cv::Mat distortionMatrix = cv::Mat::zeros(
-        4, 1, cv::DataType<double>::type);  // no distortion assumed
+    cvSink.GrabFrameNoTimeout(input);  // blocks until frame is avaliable
+    // double focalLengthx = input.cols;
+    // double focalLengthy = input.rows;
+    // cv::Point2d center = cv::Point2d(input.cols / 2, input.rows / 2);
+    cv::Mat cameraMatrix =
+        (cv::Mat_<double>(3, 3) << 9.7251025460519838e+02, 0, 538, 0,
+         9.7251025460519838e+02, 3.5650000000000000e+02, 0, 0, 1);
+    cv::Mat distortionMatrix =
+        (cv::Mat_<double>(5, 1) << 2.9666848459501894e-02,
+         7.7071617830897565e-01, 0, 0, -2.7882844813877661e+00);
     std::vector<cv::Point3f> modelPoints;
-    modelPoints.emplace_back(
-        0, 11.3165,
-        5.8241);  // top-right most corner, counter-clockwise (in inches)
-    modelPoints.emplace_back(0, 9.38, 5.3241);
-    modelPoints.emplace_back(0, 1.38, 5.3241);
-    modelPoints.emplace_back(0, -0.5565, 5.8241);
-    modelPoints.emplace_back(0, -1.9635, 0.5);
-    modelPoints.emplace_back(0, 0, 0);
-    modelPoints.emplace_back(0, 10.76, 0);
-    modelPoints.emplace_back(0, 12.6965, 0.5);
+    // top-right most corner, counter-clockwise (in meters)
+    // (0, 0, 0) is approximately center of the target
+    modelPoints.emplace_back(0, 0.1484074, 0.080289);
+    modelPoints.emplace_back(0, 0.1, 0.06777);
+    modelPoints.emplace_back(0, -0.1, 0.06777);
+    modelPoints.emplace_back(0, -0.1484074, 0.080289);
+    modelPoints.emplace_back(0, -0.1834606, -0.055251);
+    modelPoints.emplace_back(0, -0.1350532, -0.06777);
+    modelPoints.emplace_back(0, 0.1350532, -0.06777);
+    modelPoints.emplace_back(0, 0.1834606, -0.055251);
     // Main loop
     while (1) {
-        cvsink.GrabFrameNoTimeout(input);  // blocks until frame is avaliable
+        cvSink.GrabFrameNoTimeout(input);  // blocks until frame is avaliable
         pipe.Process(input);
         std::vector<std::vector<cv::Point>> output = *pipe.GetPolyDPOutput();
 
         std::vector<cv::Point2f> imagePoints = FindTarget(output);
 
         if (imagePoints.size() != 8) {
-            std::cout << imagePoints.size() << "points, continuing"
+            std::cout << imagePoints.size() << " points, continuing"
                       << std::endl;
             continue;
         }

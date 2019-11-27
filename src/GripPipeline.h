@@ -47,8 +47,8 @@ private:
                         std::vector<std::vector<cv::Point> >&);
     void convexHulls(std::vector<std::vector<cv::Point> >&,
                      std::vector<std::vector<cv::Point> >&);
-    void polyDP(std::vector<std::vector<cv::Point> >&, double epsilon,
-                bool closed, std::vector<std::vector<cv::Point> >& out);
+    void polyDP(std::vector<std::vector<cv::Point> >&, bool closed,
+                std::vector<std::vector<cv::Point> >& out);
 };
 
 }  // namespace grip

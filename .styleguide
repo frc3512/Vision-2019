@@ -22,4 +22,5 @@ includeOtherLibs {
 
 generatedFileExclude {
   thirdparty/
+  src/subprocess\.hpp$
 }
