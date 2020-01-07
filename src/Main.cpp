@@ -1,4 +1,4 @@
-// Copyright (c) 2019 FRC Team 3512. All Rights Reserved.
+// Copyright (c) 2019-2020 FRC Team 3512. All Rights Reserved.
 
 #include <unistd.h>
 
@@ -14,7 +14,6 @@
 
 #include "GripPipeline.h"
 #include "UdpSocket.hpp"
-#include "subprocess.hpp"
 #include "thirdparty/units.h"
 
 struct PnP {
