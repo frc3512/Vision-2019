@@ -48,8 +48,7 @@ def main():
     parser.add_argument(
         "target",
         choices=["build", "clean"],
-        help=
-        "'build' compiles the vision program and downloads missing dependencies. 'clean' removes all build artifacts from the build folder.",
+        help="'build' compiles the vision program and downloads missing dependencies. 'clean' removes all build artifacts from the build folder.",
     )
     args = parser.parse_args()
 
@@ -57,9 +56,21 @@ def main():
         "https://github.com/wpilibsuite/FRCVision-pi-gen/releases/download/v2019.3.1/example-cpp-2019.3.1.zip",
         "build",
     )
-    download_file(
-        "https://github.com/wpilibsuite/raspbian-toolchain/releases/download/v1.3.0/Raspbian9-Linux-Toolchain-6.3.0.tar.gz",
-        "build")
+    if sys.platform.startswith("linux"):
+        download_file(
+            "https://github.com/wpilibsuite/raspbian-toolchain/releases/download/v1.3.0/Raspbian9-Linux-Toolchain-6.3.0.tar.gz",
+            "build",
+        )
+    elif sys.platform.startswith("msys"):
+        download_file(
+            "https://github.com/wpilibsuite/raspbian-toolchain/releases/download/v1.3.0/Raspbian9-Windows-Toolchain-6.3.0.zip",
+            "build",
+        )
+    elif sys.platform.startswith("darwin"):
+        download_file(
+            "https://github.com/wpilibsuite/raspbian-toolchain/releases/download/v1.3.0/Raspbian9-Max-Toolchain-6.3.0.tar.gz",
+            "build",
+        )
 
     nproc = subprocess.check_output("nproc", encoding="utf-8").strip()
     if args.target == "build":

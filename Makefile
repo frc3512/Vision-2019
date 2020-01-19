@@ -11,16 +11,26 @@
 
 EXEC := cvTest
 
+ifeq ($(OS), Windows_NT)
+CC := build/Raspbian9-Windows-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-gcc
+CPP := build/Raspbian9-Windows-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
+LD := build/Raspbian9-Windows-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
+else ifeq ($(OS), Linux)
 CC := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-gcc
-CFLAGS := -O3 -Wall -s -std=c11 -flto
-
 CPP := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
+LD := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
+else ifeq ($(OS), Darwin)
+CC := build/Raspbian9-Mac-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-gcc
+CPP := build/Raspbian9-Mac-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
+LD := build/Raspbian9-Mac-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
+endif
+
+CFLAGS := -O3 -Wall -s -std=c11 -flto
 CPPFLAGS := -O3 -Wall -s -std=c++14 -flto
 
 # Specify defines with -D directives here
 DEFINES :=
 
-LD := build/Raspbian9-Linux-Toolchain-6.3.0/raspbian9/bin/arm-raspbian9-linux-gnueabihf-g++
 
 # Specify include paths with -I directives here
 IFLAGS := -Isrc -Isrc/thirdparty
